@@ -1,5 +1,5 @@
-server
-client
+src/server/init.server.luau
+src/client/init.client.luau
 
 # Project place file
 /Hitbox.rbxlx
