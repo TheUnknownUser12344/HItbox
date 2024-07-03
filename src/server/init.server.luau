@@ -14,4 +14,4 @@ end)
 
 hitbox.FrameRate = "Unlimited"
 
-hitbox:Enabled(10)
+hitbox:Enable(10)

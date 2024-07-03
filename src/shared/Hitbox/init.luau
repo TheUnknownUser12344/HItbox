@@ -15,6 +15,7 @@ function Hitbox.new(Parts)
         OverlapParams = nil,
         Signal = GoodSignal.new(),
         PlayerSignal = GoodSignal.new(),
+        Completed = GoodSignal.new(),
         FrameRate = "Unlimited",
 
         -- Private
@@ -62,8 +63,8 @@ function Hitbox:_Enabled()
     end
 end
 
-function Hitbox:Enabled(Time)
-    assert((self._Heartbeat and not self._Heartbeat.Connected) or (not self._Heartbeat and true), "Hitbox Is Already Enabled")    
+function Hitbox:Enable(Time)
+    assert((self._Heartbeat and not self._Heartbeat.Connected) or (not self._Heartbeat and true), "Hitbox Is Already Enabled")
 
     self.t = os.clock()
 
@@ -76,6 +77,7 @@ function Hitbox:Enabled(Time)
     end)
 
     task.delay(Time, function()
+        self.Completed:Fire()
         self:Disable()
     end)
 end
@@ -84,6 +86,14 @@ function Hitbox:Disable()
     if not self._Heartbeat.Connected then return end
 
     self._Heartbeat:Disconnect()
+end
+
+function Hitbox:Destroy()
+    for key in self do
+        self[key] = nil
+    end
+
+    setmetatable(self, nil)
 end
 
 return Hitbox
