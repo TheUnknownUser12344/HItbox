@@ -17,7 +17,7 @@ function Hitbox.new(Parts)
         PlayerSignal = GoodSignal.new(),
         Completed = GoodSignal.new(),
         FrameRate = "Unlimited",
-        Options = nil, -- "Once"
+        Options = nil, -- "Once", "Wait"
 
         -- Private
 
@@ -36,7 +36,7 @@ function Hitbox:_Delay()
     return self.FrameRate ~= "Unlimited" and os.clock() - self._t < 1 / self.FrameRate
 end
 
-function Hitbox:_Enabled()
+function Hitbox:_Enabled(CurrentThread)
     for _, Part in self.Parts do
         local PartsInPart = workspace:GetPartsInPart(Part, self.OverlapParams)
 
@@ -69,11 +69,19 @@ function Hitbox:_Enabled()
             self:Disable()
             return
         end
+
+        if self.Options == "Wait" and #PartsInPart > 0 then
+            self:Disable()
+            task.spawn(CurrentThread)
+            return
+        end
     end
 end
 
 function Hitbox:Enable(Time)
     assert((self._Heartbeat and not self._Heartbeat.Connected) or (not self._Heartbeat and true), "Hitbox Is Already Enabled")
+
+    local CurrentThread = coroutine.running()
 
     self._t = os.clock()
 
@@ -82,13 +90,17 @@ function Hitbox:Enable(Time)
         
         self._t = os.clock()
 
-        self:_Enabled()
+        self:_Enabled(CurrentThread)
     end)
 
     task.delay(Time, function()
         self:Disable()
         self.Completed:Fire()
     end)
+
+    if self.Options == "Wait" then
+        return coroutine.yield()
+    end
 end
 
 function Hitbox:Disable()
