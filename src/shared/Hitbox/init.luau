@@ -17,6 +17,7 @@ function Hitbox.new(Parts)
         PlayerSignal = GoodSignal.new(),
         Completed = GoodSignal.new(),
         FrameRate = "Unlimited",
+        Options = nil, -- "Once"
 
         -- Private
 
@@ -32,7 +33,7 @@ function Hitbox:_Identify(Part, Class)
 end
 
 function Hitbox:_Delay()
-    return self.FrameRate ~= "Unlimited" and os.clock() - self.t < 1 / self.FrameRate
+    return self.FrameRate ~= "Unlimited" and os.clock() - self._t < 1 / self.FrameRate
 end
 
 function Hitbox:_Enabled()
@@ -44,7 +45,7 @@ function Hitbox:_Enabled()
             local Parent = FoundPart.Parent ~= workspace and FoundPart.Parent or FoundPart
 
             -- Dont Fire If Its In The Cache
-            if table.find(self._PartCache, Parent) then continue end
+            if self._PartCache[Parent] then continue end
 
             self.Signal:Fire(FoundPart)
 
@@ -58,7 +59,15 @@ function Hitbox:_Enabled()
                 self.PlayerSignal:Fire(Parent, FoundPart)
             end
 
-            table.insert(self._PartCache, Parent)
+            -- This Allows For Indexing Instead Of A Find Search
+            self._PartCache[Parent] = true
+        end
+
+        -- Check Options
+
+        if self.Options == "Once" and #PartsInPart > 0 then
+            self:Disable()
+            return
         end
     end
 end
@@ -66,12 +75,12 @@ end
 function Hitbox:Enable(Time)
     assert((self._Heartbeat and not self._Heartbeat.Connected) or (not self._Heartbeat and true), "Hitbox Is Already Enabled")
 
-    self.t = os.clock()
+    self._t = os.clock()
 
     self._Heartbeat = RunService.Heartbeat:Connect(function()
         if self:_Delay() then return end
         
-        self.t = os.clock()
+        self._t = os.clock()
 
         self:_Enabled()
     end)
@@ -86,6 +95,10 @@ function Hitbox:Disable()
     if not self._Heartbeat.Connected then return end
 
     self._Heartbeat:Disconnect()
+
+    -- Clear Part Cache
+
+    self._PartCache = {}
 end
 
 function Hitbox:Destroy()
