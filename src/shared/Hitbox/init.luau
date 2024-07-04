@@ -72,7 +72,6 @@ function Hitbox:_Enabled()
 
         if self.Options == "Wait" and #PartsInPart > 0 then
             self:Disable()
-            task.spawn(self._CurrentThread)
             return
         end
     end
@@ -111,6 +110,10 @@ function Hitbox:Disable()
     -- Clear Part Cache
 
     self._PartCache = {}
+
+    if self.Options == "Wait" then
+        task.spawn(self._CurrentThread)
+    end
 end
 
 function Hitbox:Destroy()
