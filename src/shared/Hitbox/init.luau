@@ -13,8 +13,8 @@ function Hitbox.new(Parts)
 
         Parts = Parts,
         OverlapParams = nil,
-        Signal = GoodSignal.new(),
-        PlayerSignal = GoodSignal.new(),
+        PartEntered = GoodSignal.new(),
+        PlayerEntered = GoodSignal.new(),
         Completed = GoodSignal.new(),
         FrameRate = "Unlimited",
         Options = nil, -- "Once", "Wait"
@@ -47,7 +47,7 @@ function Hitbox:_Enabled(CurrentThread)
             -- Dont Fire If Its In The Cache
             if self._PartCache[Parent] then continue end
 
-            self.Signal:Fire(FoundPart)
+            self.PartEntered:Fire(FoundPart)
 
             if Hitbox:_Identify(FoundPart, "Model") then
                 local Humanoid = Parent:FindFirstChildOfClass("Humanoid")
@@ -56,7 +56,7 @@ function Hitbox:_Enabled(CurrentThread)
 
                 -- Its A Character
 
-                self.PlayerSignal:Fire(Parent, FoundPart)
+                self.PlayerEntered:Fire(Parent, FoundPart)
             end
 
             -- This Allows For Indexing Instead Of A Find Search
