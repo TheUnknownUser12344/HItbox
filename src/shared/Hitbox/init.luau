@@ -29,7 +29,7 @@ function Hitbox.new(Parts)
 end
 
 function Hitbox:_Identify(Part, Class)
-    return Part.Parent ~= workspace and Part.Parent.ClassName or Part.ClassName
+    return Part.Parent ~= workspace and Part.Parent.ClassName == Class or Part.ClassName == Class
 end
 
 function Hitbox:_Delay()
