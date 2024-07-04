@@ -36,7 +36,7 @@ function Hitbox:_Delay()
     return self.FrameRate ~= "Unlimited" and os.clock() - self._t < 1 / self.FrameRate
 end
 
-function Hitbox:_Enabled(CurrentThread)
+function Hitbox:_Enabled()
     for _, Part in self.Parts do
         local PartsInPart = workspace:GetPartsInPart(Part, self.OverlapParams)
 
@@ -72,7 +72,7 @@ function Hitbox:_Enabled(CurrentThread)
 
         if self.Options == "Wait" and #PartsInPart > 0 then
             self:Disable()
-            task.spawn(CurrentThread)
+            task.spawn(self._CurrentThread)
             return
         end
     end
@@ -81,7 +81,7 @@ end
 function Hitbox:Enable(Time)
     assert((self._Heartbeat and not self._Heartbeat.Connected) or (not self._Heartbeat and true), "Hitbox Is Already Enabled")
 
-    local CurrentThread = coroutine.running()
+    self._CurrentThread = coroutine.running()
 
     self._t = os.clock()
 
@@ -90,7 +90,7 @@ function Hitbox:Enable(Time)
         
         self._t = os.clock()
 
-        self:_Enabled(CurrentThread)
+        self:_Enabled()
     end)
 
     task.delay(Time, function()
