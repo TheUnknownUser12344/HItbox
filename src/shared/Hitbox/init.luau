@@ -86,8 +86,8 @@ function Hitbox:Enable(Time)
     end)
 
     task.delay(Time, function()
-        self.Completed:Fire()
         self:Disable()
+        self.Completed:Fire()
     end)
 end
 
