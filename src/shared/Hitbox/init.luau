@@ -65,12 +65,7 @@ function Hitbox:_Enabled()
 
         -- Check Options
 
-        if self.Options == "Once" and #PartsInPart > 0 then
-            self:Disable()
-            return
-        end
-
-        if self.Options == "Wait" and #PartsInPart > 0 then
+        if (self.Options == "Once" or self.Options == "Wait") and #PartsInPart > 0 then
             self:Disable()
             return
         end
