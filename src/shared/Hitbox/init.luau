@@ -65,7 +65,14 @@ function Hitbox:_Enabled()
 
         -- Check Options
 
+        if self.Options == "Wait" and self._CurrentThread and #PartsInPart > 0 then
+            task.spawn(self._CurrentThread)
+        end
+
         if (self.Options == "Once" or self.Options == "Wait") and #PartsInPart > 0 then
+            self.Completed:Fire()
+            
+            task.cancel(self._DelayThread)
             self:Disable()
             return
         end
@@ -87,9 +94,13 @@ function Hitbox:Enable(Time)
         self:_Enabled()
     end)
 
-    task.delay(Time, function()
-        self:Disable()
+    self._DelayThread = task.delay(Time, function()
+        if self.Options == "Wait" and self._CurrentThread then
+            task.spawn(self._CurrentThread)
+        end
+        
         self.Completed:Fire()
+        self:Disable()
     end)
 
     if self.Options == "Wait" then
@@ -101,14 +112,10 @@ function Hitbox:Disable()
     if not self._Heartbeat.Connected then return end
 
     self._Heartbeat:Disconnect()
-
+    
     -- Clear Part Cache
 
     self._PartCache = {}
-
-    if self.Options == "Wait" then
-        task.spawn(self._CurrentThread)
-    end
 end
 
 function Hitbox:Destroy()
